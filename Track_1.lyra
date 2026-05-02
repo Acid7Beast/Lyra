@@ -1,0 +1,124 @@
+// Track 1 - Lyra C++ Native Struct DSL
+
+SetCps{80, 4};
+
+Track subKick = Note{"c0"}
+    | Synth{"supersaw"}
+    | Slow{8}
+    | Lpf{140}
+    | Gain{0.28f}
+    | Room{0.6f};
+
+Track drivePunch = Multiply{Sentence{"c1", "c1", "eb1", "c1"}, 4}
+    | Synth{"wt_digital_basique"}
+    | Add{Slow{Sentence{0, 24}, 2}}
+    | Lpf{900}
+    | Hpf{40}
+    | Gain{0.35f}
+    | Crush{5}
+    | Room{0.6f};
+
+Track midPressure = Sentence{Multiply{"c2", 8}, Multiply{"eb2", 8}, Multiply{"g2", 8}}
+    | Synth{"wt_digital_echoes"}
+    | Slow{2}
+    | Lpf{1800}
+    | Distort{0.3f}
+    | Gain{0.46f}
+    | Room{0.4f};
+
+Track leadArp = Sentence{"c4", "e4", "g4", "bb4"}
+    | Synth{"gm_sitar"}
+    | Slow{1}
+    | Hpf{150}
+    | Gain{0.25f};
+
+Track leadOctave = {
+    {Multiply{Bar{"c4", "c4", "eb4", "c4"}, 8} | Synth{"supersaw"}} +
+    {Multiply{Bar{"c2", "c2", "eb2", "c2"}, 8} | Synth{"gm_synth_bass_1"}}
+}
+    | Fast{2}
+    | Lpf{4200}
+    | Gain{0.28f};
+
+Track leadOctave2 = {
+    {Multiply{Bar{"c5", "g4", "eb5", "g4"}, 8} | Synth{"supersaw"}} +
+    {Multiply{Bar{"c3", "eb3", "c3", "eb3"}, 8} | Synth{"gm_synth_bass_1"}}
+}
+    | Fast{2}
+    | Lpf{4200}
+    | Gain{0.18f};
+
+Track riffA = Sentence{
+    Bar{"c2", Grid{"c2", 1, 3}, Grid{"~", 1, 4}, Grid{"bb1", 3, 3}},
+    Bar{"~", Grid{"c2", 3, 6}}
+}
+    | Synth{"gm_distortion_guitar:[5,6]"}
+    | Distort{0.5f}
+    | Lpf{3600}
+    | Hpf{80}
+    | Sustain{0.5f}
+    | Clip{1.15f}
+    | Gain{0.9f}
+    | Room{0.05f};
+
+Track riffB = Sentence{
+    Bar{Bar{"c2", "c2"}, Bar{"~", "~", "c2"}},
+    Bar{"c2", "~", "~", "~", "~", "~", "~", "~"}
+}
+    | Synth{"gm_distortion_guitar:[5,6]"}
+    | Distort{0.5f}
+    | Lpf{3600}
+    | Hpf{80}
+    | Sustain{0.5f}
+    | Clip{1.15f}
+    | Gain{1.0f}
+    | Room{0.05f};
+
+Track leadHarm = Bar{"~", "g3", "~", "eb3"}
+    | Synth{"gm_guitar_harmonics:2"}
+    | Slow{2}
+    | Coarse{tri | Range{7, 0} | Slow{2}}
+    | Lpf{6000}
+    | Gain{0.16f}
+    | Jux{rev};
+
+Track kick = Synth{"bd"} | Bank{"RolandTR909"} | Gain{0.02f};
+Track snare = Synth{"sd"} | Bank{"RolandTR909"} | Gain{0.05f};
+Track hats = Bar{"hh", "hh", "~", "hh"} | Bank{"RolandTR909"} | Gain{0.08f};
+
+Track drums = {
+    {Grid{"bd:2", 3, 8} | Bank{"RolandTR909"}} +
+    {Bar{"~", Grid{"sd:1", 2, 6}} | Bank{"RolandTR909"}} +
+    {Note{"hh:4"} | Bank{"RolandTR909"}}
+}
+    | Clip{1.4f}
+    | Distort{0.25f}
+    | Gain{0.4f};
+
+Track mechClicks = Grid{"gm_guitar_fret_noise:2", 11, 16}
+    | Hpf{2500}
+    | Crush{5}
+    | Gain{0.16f}
+    | Pan{sine};
+
+Composition master_track = {
+    kick + 
+    snare + 
+    hats +
+    {drivePunch | Mask{Slow{Sentence{1, 1, 1, 1}, 4}}} +
+    {riffA | Mask{Slow{Sentence{0, 0, 0, 1}, 4}}} +
+    {riffB | Mask{Slow{Sentence{1, 0, 1, 0}, 4}}} +
+    {leadArp | Mask{Slow{Sentence{0, 1, 0, 0}, 4}}} +
+    {leadOctave | Mask{Slow{Sentence{0, 1, 1, 0}, 4}}} +
+    {leadOctave2 | Mask{Slow{Sentence{1, 0, 0, 0}, 4}}} +
+    {midPressure | Mask{Slow{Sentence{1, 1, 1, 0}, 4}}} +
+    {drums | Mask{Slow{Sentence{1, 1, 1, 1}, 4}}} +
+    {mechClicks | Mask{Slow{Sentence{1, 1, 0, 0}, 4}}} +
+    {leadHarm | Mask{Slow{Sentence{1, 1, 0, 0}, 4}}} +
+    {subKick | Mask{Slow{Sentence{1, 1, 1, 0}, 4}}} +
+    {Multiply{Sentence{"c2", "eb2", "g2"}, 4} | Synth{"wt_digital_echoes"} | Mask{Slow{Sentence{1, 0}, 8}} | Gain{0.28f}}
+}
+    | Slow{1}
+    | Every{8, [](Track x) { return x + {Note{"c3"} | Gain{0.12f}}; }};
+
+master_track >> Play{};
